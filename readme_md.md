@@ -56,16 +56,5 @@ Trata-se de uma aplicação estática (client-side), portanto, a execução é d
 3. Abra o arquivo `index.html` diretamente em qualquer navegador web atual (Chrome, Firefox, Edge, etc.).
 
 *(Opcional)* Para fins de desenvolvimento, recomenda-se a utilização de uma extensão como o Live Server (VS Code) para executar o projeto em um servidor local.
-
-## Como Contribuir
-
-Contribuições para a melhoria do código, adição de novos temas ou novas funcionalidades são bem-vindas:
-
-1. Faça um Fork do projeto.
-2. Crie uma branch para sua modificação (`git checkout -b feature/NovaFuncionalidade`).
-3. Realize o commit de suas alterações (`git commit -m 'Adiciona nova funcionalidade'`).
-4. Envie o push para a branch (`git push origin feature/NovaFuncionalidade`).
-5. Abra um Pull Request detalhando as alterações realizadas.
-
 ---
 Desenvolvido para facilitar e otimizar rotinas de atendimento diário.
