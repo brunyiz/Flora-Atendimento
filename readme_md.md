@@ -56,5 +56,6 @@ Trata-se de uma aplicação estática (client-side), portanto, a execução é d
 3. Abra o arquivo `index.html` diretamente em qualquer navegador web atual (Chrome, Firefox, Edge, etc.).
 
 *(Opcional)* Para fins de desenvolvimento, recomenda-se a utilização de uma extensão como o Live Server (VS Code) para executar o projeto em um servidor local.
+
 ---
 Desenvolvido para facilitar e otimizar rotinas de atendimento diário.
