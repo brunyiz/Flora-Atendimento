@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flora Atendimento v0.6.3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=0.6.3">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>
+                    <i class="fas fa-headset"></i> Flora Atendimento
+                    <span class="version-badge" id="version-display">v0.6.3</span>
+                </h1>
+                <p class="tagline">Feito com inteligência artificial, com criação e personalização humana.</p>
+                <p class="author-label">✍️ Por <strong id="author-display">brunyiz</strong></p>
+            </div>
+            <div class="controls-area">
+                <button class="theme-toggle-btn" onclick="toggleThemeMode()" title="Alternar Claro/Escuro">
+                    <i class="fas fa-sun icon-sun"></i>
+                    <i class="fas fa-moon icon-moon"></i>
+                </button>
+                <button class="btn btn-info" onclick="openManual()"><i class="fas fa-book-open"></i> Manual</button>
+                <button class="btn btn-info" onclick="openThemePicker()"><i class="fas fa-palette"></i> Cores</button>
+                <button class="btn btn-success" onclick="exportBackup()"><i class="fas fa-save"></i> Backup</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
+                    <i class="fas fa-upload"></i> Restaurar
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importBackup(event)">
+                <button class="btn btn-danger" onclick="clearAllData()"><i class="fas fa-trash"></i> Limpar Tudo</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('scripts',this)">
+                <i class="fas fa-comment-dots"></i> Respostas Rápidas
+            </button>
+            <button class="tab-btn" onclick="switchTab('transfer',this)">
+                <i class="fas fa-exchange-alt"></i> Transferências
+            </button>
+            <button class="tab-btn" onclick="switchTab('settings',this)">
+                <i class="fas fa-cog"></i> Configurações
+            </button>
+        </div>
+
+        <div id="tab-scripts" class="content-area active">
+            <div class="grid-layout">
+                <div class="card sidebar-sticky">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <span class="section-label" style="font-size:.8rem;margin-bottom:0;">
+                            <i class="fas fa-folder"></i> Categorias
+                        </span>
+                        <button class="btn-icon edit-btn" onclick="openCategoryModal()" title="Nova Categoria" style="color:var(--accent);font-size:.9rem;">
+                            <i class="fas fa-plus-circle"></i>
+                        </button>
+                    </div>
+                    <div class="recent-section" id="recent-section" style="display:none;">
+                        <div class="section-label"><i class="fas fa-clock"></i> Usados Recentemente</div>
+                        <div id="recent-chips"></div>
+                    </div>
+                    <div class="category-list" id="category-list"></div>
+                </div>
+                <div class="card">
+                    <div class="search-bar-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-script" class="form-control" placeholder="Pesquisar por título ou conteúdo... (Ctrl+K)" oninput="renderScripts()">
+                        </div>
+                        <button class="btn btn-primary" onclick="openScriptModal()">
+                            <i class="fas fa-plus"></i> Novo Script
+                        </button>
+                    </div>
+                    <h2 id="current-category-title" style="color:var(--accent);margin-bottom:14px;font-size:1.15rem;font-weight:700;">
+                        Todos os Scripts
+                    </h2>
+                    <div class="scripts-grid" id="scripts-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-transfer" class="content-area">
+            <div class="card" style="max-width:820px;margin:0 auto;">
+                <h2 style="color:var(--accent);margin-bottom:18px;font-size:1.2rem;">
+                    <i class="fas fa-share"></i> Gerador de Transferência
+                </h2>
+                <div class="form-group">
+                    <label>Setor de Destino</label>
+                    <div class="tags-container" id="sector-tags"></div>
+                    <input type="text" id="transf-sector" class="form-control" placeholder="Ou digite o setor manualmente...">
+                </div>
+                <div class="form-group">
+                    <label>Nome do Cliente</label>
+                    <input type="text" id="transf-client" class="form-control" placeholder="Ex: João da Silva">
+                </div>
+                <div class="form-group">
+                    <label>Descrição do Problema</label>
+                    <div class="tags-container" id="desc-tags"></div>
+                    <textarea id="transf-desc" class="form-control" rows="3" placeholder="Ou descreva o atendimento..."></textarea>
+                </div>
+                <button class="btn btn-success" style="width:100%;font-size:1rem;padding:13px;" onclick="generateAndCopyTransfer()">
+                    <i class="fas fa-copy"></i> Gerar e Copiar para WhatsApp
+                </button>
+                <div class="transfer-preview" id="transfer-preview">*Atendimento transferido* ✅
+
+*Setor:*
+*Cliente:*
+*Descrição:* </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="content-area">
+            <div class="grid-layout">
+                <div class="card">
+                    <h3 style="color:var(--accent);margin-bottom:10px;font-size:1rem;">
+                        <i class="fas fa-building"></i> Setores Predefinidos
+                    </h3>
+                    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px;">Para clique rápido na tela de transferência.</p>
+                    <div class="form-group" style="display:flex;gap:6px;">
+                        <input type="text" id="new-sector-input" class="form-control" placeholder="Novo setor..." onkeydown="if(event.key==='Enter')addSettingItem('sectors','new-sector-input')">
+                        <button class="btn btn-primary" onclick="addSettingItem('sectors','new-sector-input')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="category-list" id="settings-sector-list"></div>
+                </div>
+                <div class="card">
+                    <h3 style="color:var(--accent);margin-bottom:10px;font-size:1rem;">
+                        <i class="fas fa-comment-alt"></i> Descrições Padrão
+                    </h3>
+                    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px;">Descrições rotineiras para clique rápido.</p>
+                    <div class="form-group" style="display:flex;gap:6px;">
+                        <input type="text" id="new-desc-input" class="form-control" placeholder="Nova descrição..." onkeydown="if(event.key==='Enter')addSettingItem('descriptions','new-desc-input')">
+                        <button class="btn btn-primary" onclick="addSettingItem('descriptions','new-desc-input')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="category-list" id="settings-desc-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-category">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-folder-plus"></i> Nova Categoria</h3>
+                <button class="btn-icon" onclick="closeModal('modal-category')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Nome da Categoria</label>
+                <input type="text" id="cat-name" class="form-control" placeholder="Ex: Sem Conexão" onkeydown="if(event.key==='Enter')saveCategory()">
+            </div>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveCategory()"><i class="fas fa-save"></i> Salvar</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-script">
+        <div class="modal-content" style="max-width:640px;">
+            <div class="modal-header">
+                <h3 id="modal-script-title"><i class="fas fa-file-alt"></i> Novo Script</h3>
+                <button class="btn-icon" onclick="closeModal('modal-script')"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="hidden" id="script-id">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="script-title" class="form-control" placeholder="Ex: Saudação Inicial">
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="script-category" class="form-control"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Texto do Script</label>
+                <div style="font-size:.76rem;color:var(--btn-opt-color);margin-bottom:7px;background:var(--lilas-claro);padding:7px 10px;border-radius:8px;line-height:1.6;transition:background .3s;">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>[button:opção1/opção2]</strong> → botões dinâmicos &nbsp;•&nbsp;
+                    <strong>[variável]</strong> → campo preenchível &nbsp;•&nbsp;
+                    <strong>*texto*</strong> → negrito &nbsp;•&nbsp;
+                    <strong>[Saudação]</strong> / <strong>[Data Atual]</strong> → automáticos
+                </div>
+                <textarea id="script-content" class="form-control" rows="7" placeholder="Ex: Olá [button:senhor/senhora], identifiquei um boleto de [data]."></textarea>
+            </div>
+            <button class="btn btn-primary" style="width:100%;" onclick="saveScript()"><i class="fas fa-save"></i> Salvar Script</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-variables">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-magic"></i> Preencher Dados</h3>
+                <button class="btn-icon" onclick="closeModal('modal-variables')"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="variables-container"></div>
+            <button class="btn btn-success" style="width:100%;margin-top:14px;" onclick="finalizeCopyVariables()"><i class="fas fa-check"></i> Preencher e Copiar</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-theme">
+        <div class="modal-content" style="max-width:420px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-palette"></i> Cor do Tema</h3>
+                <button class="btn-icon" onclick="closeModal('modal-theme')"><i class="fas fa-times"></i></button>
+            </div>
+            <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px;">Escolha a cor principal. O modo claro/escuro é alternado no botão <i class="fas fa-sun" style="font-size:.9em;"></i>/<i class="fas fa-moon" style="font-size:.9em;"></i> ao lado.</p>
+            <div class="theme-color-grid" id="theme-color-grid"></div>
+            <div class="theme-mode-indicator" id="theme-mode-indicator">Modo atual: <strong id="mode-label">Claro</strong></div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-manual">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3><i class="fas fa-book-open"></i> Manual de Uso — Flora Atendimento</h3>
+                <button class="btn-icon" onclick="closeModal('modal-manual')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="manual-section">
+                <h4><i class="fas fa-sitemap"></i> Arquitetura Modular (Nova Estrutura)</h4>
+                <p>O sistema foi reescrito utilizando a arquitetura de <strong>Módulos ES6</strong> para garantir estabilidade, segurança e facilidade de manutenção. O projeto agora é dividido por responsabilidades:</p>
+                <ul>
+                    <li><code>main.js</code>: Maestro do sistema. Inicializa os componentes e gerencia os eventos globais da interface.</li>
+                    <li><code>storage.js</code>: Banco de dados local. Cuida exclusivamente de salvar, carregar e gerenciar backups.</li>
+                    <li><code>theme.js</code>: Motor gráfico. Responsável por aplicar variáveis CSS, alternar modos e sincronizar as paletas.</li>
+                    <li><code>scripts.js / ui.js</code>: Motores lógicos que geram os cards dinâmicos e controlam o que aparece na tela.</li>
+                </ul>
+                <p style="margin-top:6px;font-size:.82rem;color:var(--text-muted);">💡 <em>Nota técnica: O sistema agora requer a execução através de um servidor local (Live Server) devido à política de CORS dos módulos do navegador.</em></p>
+            </div>
+            <div class="manual-section">
+            <h4><i class="fas fa-magic"></i> Botões Dinâmicos <code style="font-size:.8em;">[button:]</code></h4>
+            <p>Insira <strong>[button:opção1/opção2/opção3]</strong> no texto do script. As opções são separadas por <strong>/</strong>.</p>
+            <div class="code-ex">[button:senhor/senhora]
+[button:WhatsApp/telefone/e-mail]
+[button:sim/não]</div>
+        <p>Cada comando cria um grupo de botões abaixo do card. Ao clicar, a opção substitui o placeholder no texto copiado. O botão "Copiar" fica destacado (na cor do tema) quando todos estão selecionados.</p>
+        <div class="code-ex">Texto:  "Olá [button:senhor/senhora], há [button:lentidão/queda total] no seu plano."
+            → Clicando "senhora" e "queda total":
+        Cópia:  "Olá senhora, há queda total no seu plano."</div>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-code"></i> Variáveis Preenchíveis <code style="font-size:.8em;">[variável]</code></h4>
+        <p>Use colchetes simples para campos que serão preenchidos digitando na hora de copiar.</p>
+        <div class="code-ex">Identifiquei um boleto de [data] em aberto. CPF: [cpf]</div>
+        <p>Um modal abrirá pedindo os valores. Deixar em branco mantém o placeholder.</p>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-robot"></i> Substituições Automáticas</h4>
+        <ul>
+            <li><strong>[Saudação]</strong> → Bom dia / Boa tarde / Boa noite (detecta a hora)</li>
+            <li><strong>[Data Atual]</strong> → insere a data de hoje no formato dd/mm/aaaa</li>
+        </ul>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-folder-open"></i> Categorias — Editar e Reorganizar</h4>
+        <p>As categorias da sidebar agora exibem os nomes completos e podem ser <strong>editadas</strong> e <strong>reordenadas</strong> livremente:</p>
+        <ul>
+            <li><strong>Renomear:</strong> passe o mouse sobre a categoria e clique em <i class="fas fa-edit" style="font-size:.9em;"></i>. Edite e pressione <span class="kbd">Enter</span> para salvar.</li>
+            <li><strong>Reordenar (arrastar):</strong> clique e arraste o ícone <i class="fas fa-grip-vertical" style="font-size:.9em;"></i> da esquerda para mover a categoria livremente. A nova posição é salva automaticamente.</li>
+            <li><strong>Excluir:</strong> ícone <i class="fas fa-trash-alt" style="font-size:.9em;"></i>. Os scripts da categoria não são apagados.</li>
+        </ul>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-arrows-alt"></i> Scripts — Arrastar e Soltar</h4>
+        <p>Agora é possível <strong>reorganizar os scripts livremente</strong> dentro de cada categoria, colocando os mais importantes no topo.</p>
+        <ul>
+            <li>Passe o mouse sobre um card de script para ver o ícone de arrastar <i class="fas fa-grip-vertical" style="font-size:.9em;"></i> aparecer no título.</li>
+            <li>Clique e arraste para mover o script para qualquer posição.</li>
+            <li>A nova ordem é <strong>salva automaticamente</strong> por categoria e persiste ao atualizar a página.</li>
+            <li>Cada categoria tem sua própria ordem independente.</li>
+            <li>A visão "Todas" também suporta reordenação (salva separadamente).</li>
+            <li>Ao pesquisar, a função de arrastar é temporariamente desativada para não confundir os resultados.</li>
+        </ul>
+        <p style="margin-top:6px;font-size:.82rem;color:var(--text-muted);">💡 <em>Dica: coloque os scripts mais usados no topo de cada categoria para acesso mais rápido no dia a dia.</em></p>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-palette"></i> Sistema de Temas — Cor + Modo Claro/Escuro</h4>
+        <p>O sistema usa um modelo <strong>completamente integrado</strong> de tema — todos os componentes seguem a paleta escolhida:</p>
+        <ul>
+            <li>Escolha a <strong>cor principal</strong> do tema (Rosa, Azul, Verde, Roxo, etc.) no seletor de cores.</li>
+            <li>O botão <i class="fas fa-sun"></i>/<i class="fas fa-moon"></i> no cabeçalho alterna entre <strong>modo claro</strong> e <strong>modo escuro</strong>.</li>
+            <li>Ao alternar, a cor permanece a mesma — apenas a luminosidade e o fundo mudam.</li>
+            <li>Todos os componentes acompanham automaticamente: botões, inputs, cards, modais, sidebar, scrollbar, áreas de texto, ícones e destaques.</li>
+            <li>O tema escolhido é salvo automaticamente no navegador e persiste ao reabrir.</li>
+        </ul>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-check-circle"></i> Botão Copiar — Adaptação Visual Automática</h4>
+        <p>O botão <strong>Copiar</strong> agora segue <em>automaticamente</em> a identidade visual do tema ativo:</p>
+        <ul>
+            <li>Em temas <strong>escuros</strong>, o botão usa a cor do tema de forma limpa e elegante — sem o verde fixo que quebrava a paleta.</li>
+            <li>Em temas <strong>claros</strong>, o botão usa a cor de destaque do tema com alto contraste.</li>
+            <li>O estado inativo (sem todas as opções selecionadas) exibe o botão neutro (cinza) para indicar que ainda há ações pendentes.</li>
+            <li>Cada tema gera sua própria versão do botão: Rosa escuro → rosa elegante, Azul escuro → azul integrado, etc.</li>
+        </ul>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-star"></i> Favoritos</h4>
+        <p>Clique no ⭐ no canto de qualquer card. Scripts favoritos ganham borda dourada e aparecem na categoria <strong>"⭐ Favoritos"</strong> na sidebar.</p>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-clock"></i> Scripts Recentes</h4>
+        <p>Os últimos <strong>5 scripts copiados</strong> aparecem no topo da sidebar como chips de acesso rápido.</p>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-keyboard"></i> Atalhos de Teclado</h4>
+        <ul>
+            <li><span class="kbd">Ctrl</span>+<span class="kbd">K</span> → Foca na busca</li>
+            <li><span class="kbd">Esc</span> → Fecha qualquer modal</li>
+            <li><span class="kbd">Enter</span> → Confirmar em campos (categoria, variáveis, configurações)</li>
+        </ul>
+    </div>
+
+    <div class="manual-section">
+        <h4><i class="fas fa-save"></i> Backup e Restauração</h4>
+        <p><strong>Backup</strong> exporta todos os dados em um arquivo <code>.json</code>. <strong>Restaurar</strong> recarrega um backup salvo.</p>
+    </div>
+            <div style="border-top:1px solid var(--cinza);padding-top:12px;margin-top:4px;text-align:center;">
+                <p style="font-size:.76rem;color:var(--text-muted);">Flora Atendimento <span id="manual-version-label"></span> — Feito com inteligência artificial, com criação e personalização humana.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js?v=0.6.3"></script>
+</body>
+</html>

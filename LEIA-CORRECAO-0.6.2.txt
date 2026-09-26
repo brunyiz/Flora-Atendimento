@@ -1,0 +1,11 @@
+Correção v0.6.3
+
+O problema era visual/cache/precedência de CSS. Esta versão força o modo escuro a ficar quase preto por CSS e por JS.
+
+Para testar:
+1. Extraia em uma pasta nova, não por cima da antiga.
+2. Rode pelo Live Server.
+3. Aperte Ctrl + F5.
+4. No console deve aparecer: [Flora] theme engine v0.6.3 carregado.
+
+Se essa frase não aparecer, o navegador ainda está abrindo uma versão antiga.
